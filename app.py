@@ -380,19 +380,20 @@ if submitted:
         probabilities = model.predict_proba(input_df)[0]
         classes = list(model.classes_)
 
-        if 1 not in classes:
-            st.error("The trained model does not contain the expected purchase class.")
-            st.stop()
-
         purchase_index = classes.index(1)
+        no_purchase_index = classes.index(0)
+
         purchase_probability = float(probabilities[purchase_index])
-        no_purchase_probability = 1.0 - purchase_probability
+        no_purchase_probability = float(probabilities[no_purchase_index])
+
         predicted_class = int(model.predict(input_df)[0])
+        is_purchase = predicted_class == 1
 
     except Exception as exc:
         st.error("Prediction failed. Please check the model and input features.")
         st.code(str(exc))
         st.stop()
+
 
     st.divider()
     st.header("2. Prediction results")
@@ -428,7 +429,7 @@ if submitted:
         )
 
     with col3:
-        prediction_label = "Purchase" if predicted_class == 1 else "No purchase"
+        prediction_label = "Purchase" if is_purchase else "No purchase"
         st.markdown(
             f"""
             <div class="result-panel">
@@ -444,7 +445,7 @@ if submitted:
 
     st.subheader("Business recommendation")
 
-    if predicted_class == 1:
+    if is_purchase :
         recommendation_title = "Purchase likely"
         recommendation_text = (
             "The model predicts that this session is more likely to result "
